@@ -47,7 +47,6 @@ jobs:
       # Step 7: Remove all files except the dist folder
       - name: Clean up and keep only the dist folder
         run: |
-          find . -mindepth 1 -not -name 'dist' -not -path './dist/*' -exec rm -rf {} +
           mv dist/* .
           rm -rf dist
 
