@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import Header from '../Dashboard/Header';
+import ChatButton from '../chat/ChatButton';
+
 import { Menu, X } from 'lucide-react';
 
 export default function MainLayout() {
@@ -30,6 +32,7 @@ export default function MainLayout() {
         <main className="flex-1 overflow-y-auto">
           <Outlet />
         </main>
+        <ChatButton />
       </div>
     </div>
   );
