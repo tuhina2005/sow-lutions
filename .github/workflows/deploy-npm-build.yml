@@ -1,0 +1,45 @@
+name: Build and Deploy to npm-builds
+
+on:
+  push:
+    branches:
+      - LalithCodes
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Checkout the repository
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # Step 2: Set up Node.js environment
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16 # Change to your project's Node.js version
+          cache: 'npm'
+
+      # Step 3: Install dependencies
+      - name: Install dependencies
+        run: npm install
+
+      # Step 4: Build the project
+      - name: Build the project
+        run: npm run build
+
+      # Step 5: Deploy build to npm-builds branch
+      - name: Deploy to npm-builds
+        run: |
+          git config user.name "${{ github.actor }}"
+          git config user.email "${{ github.actor }}@users.noreply.github.com"
+          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}
+          git fetch origin npm-builds
+          git switch -C npm-builds origin/npm-builds || git switch -C npm-builds
+          rm -rf *
+          cp -r build/* .
+          git add .
+          git commit -m "Deploy build from LalithCodes branch: $GITHUB_SHA" || echo "No changes to commit"
+          git push origin npm-builds --force
+
