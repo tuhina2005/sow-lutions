@@ -18,30 +18,42 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: 18 # Change to your project's Node.js version
+          node-version: 18 # Match your project's Node.js version
           cache: 'npm'
 
-      # Step 3: Install dependencies
-      - name: Install dependencies
-        run: npm install
-
-      # Step 4: Build the project
-      - name: Build the project
-        run: npm run build
-      - name: Show Files
-        run: ls
-      # Step 5: Deploy build to npm-builds branch
-      - name: Deploy to npm-builds
+      # Step 3: Switch to the npm-builds branch
+      - name: Checkout npm-builds branch
         run: |
           git config user.name "${{ github.actor }}"
           git config user.email "${{ github.actor }}@users.noreply.github.com"
           git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}
           git fetch origin npm-builds
           git switch -C npm-builds origin/npm-builds || git switch -C npm-builds
-          rm -rf *
-          ls
-          cp -r dist/* .
+
+      # Step 4: Copy contents from LalithCodes branch to npm-builds branch
+      - name: Copy content from LalithCodes branch
+        run: |
+          git checkout LalithCodes -- .
+          git reset HEAD
+
+      # Step 5: Install dependencies
+      - name: Install dependencies
+        run: npm install
+
+      # Step 6: Build the project
+      - name: Build the project
+        run: npm run build
+
+      # Step 7: Remove all files except the dist folder
+      - name: Clean up and keep only the dist folder
+        run: |
+          find . -mindepth 1 -not -name 'dist' -not -path './dist/*' -exec rm -rf {} +
+          mv dist/* .
+          rm -rf dist
+
+      # Step 8: Commit and push the changes to npm-builds branch
+      - name: Commit and push changes
+        run: |
           git add .
           git commit -m "Deploy build from LalithCodes branch: $GITHUB_SHA" || echo "No changes to commit"
           git push origin npm-builds --force
-
