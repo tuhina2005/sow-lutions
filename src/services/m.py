@@ -1,11 +1,15 @@
+from flask import Flask, request, jsonify
+from flask_cors import CORS
 import torch
 import torch.nn as nn
 from torchvision import transforms
 from PIL import Image
-import sys
-import json
 import os
 
+app = Flask(__name__)
+CORS(app)  # Enable CORS for all routes
+
+# Model definition
 def ConvBlock(in_channels, out_channels, pool=False):
     layers = [
         nn.Conv2d(in_channels, out_channels, kernel_size=3, padding=1),
@@ -41,6 +45,7 @@ class ResNet9(nn.Module):
         out = self.classifier(out)
         return out
 
+# Preprocessing function
 def preprocess_image(image_path):
     transform = transforms.Compose([
         transforms.Resize((256, 256)),
@@ -49,66 +54,62 @@ def preprocess_image(image_path):
     image = Image.open(image_path).convert('RGB')
     return transform(image).unsqueeze(0)
 
-def main():
-    # Get image path from command line argument
-    if len(sys.argv) != 2:
-        result = {"error": "Please provide image path as argument"}
-        print(json.dumps(result))
-        return
+# Define classes
+classes = ['Apple___Apple_scab', 'Apple___Black_rot', 'Apple___Cedar_apple_rust', 'Apple___healthy', 
+           'Blueberry___healthy', 'Cherry_(including_sour)___Powdery_mildew', 'Cherry_(including_sour)___healthy',
+           'Corn_(maize)___Cercospora_leaf_spot Gray_leaf_spot', 'Corn_(maize)___Common_rust_',
+           'Corn_(maize)___Northern_Leaf_Blight', 'Corn_(maize)___healthy', 'Grape___Black_rot',
+           'Grape___Esca_(Black_Measles)', 'Grape___Leaf_blight_(Isariopsis_Leaf_Spot)', 'Grape___healthy',
+           'Orange___Haunglongbing_(Citrus_greening)', 'Peach___Bacterial_spot', 'Peach___healthy',
+           'Pepper,_bell___Bacterial_spot', 'Pepper,_bell___healthy', 'Potato___Early_blight',
+           'Potato___Late_blight', 'Potato___healthy', 'Raspberry___healthy', 'Soybean___healthy',
+           'Squash___Powdery_mildew', 'Strawberry___Leaf_scorch', 'Strawberry___healthy',
+           'Tomato___Bacterial_spot', 'Tomato___Early_blight', 'Tomato___Late_blight',
+           'Tomato___Leaf_Mold', 'Tomato___Septoria_leaf_spot', 'Tomato___Spider_mites Two-spotted_spider_mite',
+           'Tomato___Target_Spot', 'Tomato___Tomato_Yellow_Leaf_Curl_Virus', 'Tomato___Tomato_mosaic_virus',
+           'Tomato___healthy']
 
-    image_path = sys.argv[1]
-    
-    # Check if image exists
-    if not os.path.exists(image_path):
-        result = {"error": f"Image file not found: {image_path}"}
-        print(json.dumps(result))
-        return
+# Load the model
+in_channels = 3
+num_diseases = len(classes)
+model = ResNet9(in_channels, num_diseases)
+model_path = os.path.join(os.path.dirname(__file__), 'plant-disease-model.pth')
 
-    classes = ['Apple___Apple_scab', 'Apple___Black_rot', 'Apple___Cedar_apple_rust', 'Apple___healthy', 
-               'Blueberry___healthy', 'Cherry_(including_sour)___Powdery_mildew', 'Cherry_(including_sour)___healthy',
-               'Corn_(maize)___Cercospora_leaf_spot Gray_leaf_spot', 'Corn_(maize)___Common_rust_',
-               'Corn_(maize)___Northern_Leaf_Blight', 'Corn_(maize)___healthy', 'Grape___Black_rot',
-               'Grape___Esca_(Black_Measles)', 'Grape___Leaf_blight_(Isariopsis_Leaf_Spot)', 'Grape___healthy',
-               'Orange___Haunglongbing_(Citrus_greening)', 'Peach___Bacterial_spot', 'Peach___healthy',
-               'Pepper,_bell___Bacterial_spot', 'Pepper,_bell___healthy', 'Potato___Early_blight',
-               'Potato___Late_blight', 'Potato___healthy', 'Raspberry___healthy', 'Soybean___healthy',
-               'Squash___Powdery_mildew', 'Strawberry___Leaf_scorch', 'Strawberry___healthy',
-               'Tomato___Bacterial_spot', 'Tomato___Early_blight', 'Tomato___Late_blight',
-               'Tomato___Leaf_Mold', 'Tomato___Septoria_leaf_spot', 'Tomato___Spider_mites Two-spotted_spider_mite',
-               'Tomato___Target_Spot', 'Tomato___Tomato_Yellow_Leaf_Curl_Virus', 'Tomato___Tomato_mosaic_virus',
-               'Tomato___healthy']
+if os.path.exists(model_path):
+    model.load_state_dict(torch.load(model_path, map_location=torch.device('cpu')))
+model.eval()
 
+@app.route('/api/pest-detection/analyze', methods=['POST'])
+def analyze_image():
+    if 'image' not in request.files:
+        return jsonify({"error": "No image file provided", "success": False}), 400
+
+    image_file = request.files['image']
     try:
-        in_channels = 3
-        num_diseases = 38
-        model = ResNet9(in_channels, num_diseases)
+        # Save and preprocess the image
+        temp_path = os.path.join("temp", image_file.filename)
+        os.makedirs(os.path.dirname(temp_path), exist_ok=True)
+        image_file.save(temp_path)
         
-        # Load model weights
-        model_path = os.path.join(os.path.dirname(__file__), 'plant-disease-model.pth')
-        model.load_state_dict(torch.load(model_path, map_location=torch.device('cpu'), weights_only=True))
-        model.eval()
-
-        # Process image and make prediction
-        input_tensor = preprocess_image(image_path)
+        input_tensor = preprocess_image(temp_path)
         
+        # Predict
         with torch.no_grad():
             output = model(input_tensor)
             probabilities = torch.nn.functional.softmax(output, dim=1)
             confidence, preds = torch.max(probabilities, dim=1)
-            
-            result = {
-                "prediction": classes[preds[0].item()],
-                "confidence": float(confidence[0].item()),
-                "success": True
-            }
-            print(json.dumps(result))
+        
+        # Cleanup
+        os.remove(temp_path)
+
+        return jsonify({
+            "prediction": classes[preds[0].item()],
+            "confidence": float(confidence[0].item()),
+            "success": True
+        })
 
     except Exception as e:
-        result = {
-            "error": str(e),
-            "success": False
-        }
-        print(json.dumps(result))
+        return jsonify({"error": str(e), "success": False}), 500
 
-if __name__ == "__main__":
-    main()
+if __name__ == '__main__':
+    app.run(debug=True, port=3000)
