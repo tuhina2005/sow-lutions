@@ -28,7 +28,8 @@ jobs:
       # Step 4: Build the project
       - name: Build the project
         run: npm run build
-
+      - name: Show Files
+        run: ls
       # Step 5: Deploy build to npm-builds branch
       - name: Deploy to npm-builds
         run: |
@@ -38,6 +39,7 @@ jobs:
           git fetch origin npm-builds
           git switch -C npm-builds origin/npm-builds || git switch -C npm-builds
           rm -rf *
+          ls
           cp -r dist/* .
           git add .
           git commit -m "Deploy build from LalithCodes branch: $GITHUB_SHA" || echo "No changes to commit"
