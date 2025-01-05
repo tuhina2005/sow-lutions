@@ -38,7 +38,7 @@ jobs:
           git fetch origin npm-builds
           git switch -C npm-builds origin/npm-builds || git switch -C npm-builds
           rm -rf *
-          cp -r build/* .
+          cp -r dist/* .
           git add .
           git commit -m "Deploy build from LalithCodes branch: $GITHUB_SHA" || echo "No changes to commit"
           git push origin npm-builds --force
