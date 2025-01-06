@@ -117,7 +117,7 @@ export default function Analytics() {
 
         {data && (
           <div className="grid grid-cols-1 lg:grid-cols-1 gap-6">
-            <Card style="padding-bottom:20px;">
+            <Card>
             <AreaChart
                 data={data.yieldData || []}
                 color="#22c55e"

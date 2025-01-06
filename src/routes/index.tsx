@@ -13,6 +13,8 @@ import Settings from '../pages/Settings';
 import Forum from '../pages/Forum';
 import PostDetail from '../pages/forum/PostDetail';
 import Weather from '../pages/Weather';
+import News from '../pages/News';
+
 
 export const router = createBrowserRouter([
   {
@@ -65,6 +67,10 @@ export const router = createBrowserRouter([
       {
         path: '/forum/post/:id',
         element: <PostDetail />,
+      },
+      {
+        path: '/news',
+        element: <News />,
       },
     ],
   },
