@@ -26,7 +26,7 @@ const menuItems = [
   { icon: TestTube2, label: 'Nutrients', path: '/nutrient-management' },
   { icon: Bug, label: 'Pest Detection', path: '/pest-control' },
   { icon: Map, label: 'Farm Map', path: '/farm-mapping' },
-  { icon: LineChart, label: 'Analytics', path: '/analytics' },
+  { icon: LineChart, label: 'Price Predictions', path: '/analytics' },
   { icon: MessageSquare, label: 'Forum', path: '/forum' },
   { icon: Bell, label: 'Alerts', path: '/alerts' },
   { icon: Cloud, label: 'Weather', path: '/weather' },
