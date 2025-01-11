@@ -15,7 +15,6 @@ import PostDetail from '../pages/forum/PostDetail';
 import Weather from '../pages/Weather';
 import News from '../pages/News';
 
-
 export const router = createBrowserRouter([
   {
     element: <MainLayout />,

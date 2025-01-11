@@ -3,8 +3,7 @@ import { supabase } from '../supabase';
 export async function fetchPosts(categoryId = 'all', searchQuery = '') {
   let query = supabase
     .from('forum_posts')
-    .select()
-    .order('created_at', { ascending: false }); // Select all fields from `forum_posts`
+    .select(); // Select all fields from `forum_posts`
     // .order('created_at', { ascending: false });
     
   // console.log(data);
@@ -71,7 +70,6 @@ export async function fetchPost(id) {
     .from('forum_posts')
     .select('*')
     .eq('id', id)
-    .order('created_at', { ascending: false })
     .single();
 
   if (error) {
@@ -148,8 +146,7 @@ export async function createComment(postId, content) {
     .insert({
       content,
       post_id: postId,
-    })
-    ;
+    });
 
   if (error) {
     console.error('Error creating comment:', error);
