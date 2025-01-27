@@ -38,7 +38,7 @@ export default function Weather() {
     const fetchWeather = async () => {
       try {
         const response = await fetch(
-          `https://api.openweathermap.org/data/2.5/weather?q=Chennai&units=metric&appid=0f5a2eb7ee228e0d0cc4b7bd3426a17e`
+          `https://api.openweathermap.org/data/2.5/weather?q=Yakutsk&units=metric&appid=0f5a2eb7ee228e0d0cc4b7bd3426a17e`
         );
         const data: WeatherData = await response.json();
         setWeather(data);

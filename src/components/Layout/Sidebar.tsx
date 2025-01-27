@@ -10,8 +10,8 @@ import {
   LineChart, 
   Bell, 
   Settings,
-  MessageSquare,
   Newspaper,
+  MessageSquare,
   X 
 } from 'lucide-react';
 import { Cloud } from 'lucide-react';
@@ -23,11 +23,11 @@ interface SidebarProps {
 const menuItems = [
   { icon: LayoutDashboard, label: 'Overview', path: '/' },
   { icon: Sprout, label: 'Crop Health', path: '/crop-health' },
-  { icon: Droplets, label: 'Water Levels', path: '/water-management' },
-  { icon: TestTube2, label: 'Nutrients', path: '/nutrient-management' },
+  // { icon: Droplets, label: 'Water Levels', path: '/water-management' },
+  // { icon: TestTube2, label: 'Nutrients', path: '/nutrient-management' },
   { icon: Bug, label: 'Pest Detection', path: '/pest-control' },
-  { icon: Map, label: 'Farm Map', path: '/farm-mapping' },
-  { icon: LineChart, label: 'Analytics', path: '/analytics' },
+  // { icon: Map, label: 'Farm Map', path: '/farm-mapping' },
+  { icon: LineChart, label: 'Price Predictions', path: '/analytics' },
   { icon: MessageSquare, label: 'Forum', path: '/forum' },
   { icon: Bell, label: 'Alerts', path: '/alerts' },
   { icon: Newspaper, label: 'News', path: '/news' },
