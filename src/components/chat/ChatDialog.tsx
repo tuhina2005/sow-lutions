@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Send, X, Loader2 } from 'lucide-react';
 import { useMediaQuery } from '../../hooks/useMediaQuery';
 import { useChat } from '../../hooks/useChat';
+import ReactMarkdown from 'react-markdown';
 
 interface ChatDialogProps {
   onClose: () => void;
@@ -9,7 +10,7 @@ interface ChatDialogProps {
 
 export default function ChatDialog({ onClose }: ChatDialogProps) {
   const isMobile = useMediaQuery('(max-width: 640px)');
-  const { messages, sendMessage, isLoading } = useChat();
+  const { messages, sendMessage, isLoading, contextUsed } = useChat();
   const [input, setInput] = useState('');
   
   const handleSend = async () => {
@@ -26,7 +27,10 @@ export default function ChatDialog({ onClose }: ChatDialogProps) {
       ${isMobile ? 'fixed inset-x-0 inset-y-0 m-4 rounded-lg' : 'h-[500px]'}
     `}>
       <div className="p-4 border-b border-gray-200 flex justify-between items-center bg-green-600 text-white rounded-t-lg">
-        <h3 className="font-semibold">AgriSmart Assistant</h3>
+        <div>
+          <h3 className="font-semibold">AgriSmart Assistant</h3>
+          <p className="text-xs text-green-100">Powered by Agricultural Knowledge Base</p>
+        </div>
         <button 
           onClick={onClose}
           className="p-1 hover:bg-green-700 rounded"
@@ -48,7 +52,7 @@ export default function ChatDialog({ onClose }: ChatDialogProps) {
                   : 'bg-green-600 text-white'
               }`}
             >
-              {message.text}
+              {message.isBot ? <ReactMarkdown>{message.text}</ReactMarkdown> : message.text}
             </div>
           </div>
         ))}

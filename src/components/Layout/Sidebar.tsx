@@ -12,6 +12,8 @@ import {
   Settings,
   Newspaper,
   MessageSquare,
+  Bot,
+  Database,
   X 
 } from 'lucide-react';
 import { Cloud } from 'lucide-react';
@@ -22,6 +24,8 @@ interface SidebarProps {
 
 const menuItems = [
   { icon: LayoutDashboard, label: 'Overview', path: '/' },
+  { icon: Bot, label: 'AI Assistant', path: '/agritech-chatbot' },
+  { icon: Database, label: 'Farm Data', path: '/farm-data' },
   { icon: Sprout, label: 'Crop Health', path: '/crop-health' },
   // { icon: Droplets, label: 'Water Levels', path: '/water-management' },
   // { icon: TestTube2, label: 'Nutrients', path: '/nutrient-management' },

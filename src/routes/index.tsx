@@ -14,6 +14,9 @@ import Forum from '../pages/Forum';
 import PostDetail from '../pages/forum/PostDetail';
 import Weather from '../pages/Weather';
 import News from '../pages/News';
+import AgritechChatbotPage from '../pages/AgritechChatbot';
+import FarmDataEntry from '../pages/FarmDataEntry';
+import FarmDataDebugPage from '../pages/FarmDataDebug';
 
 
 export const router = createBrowserRouter([
@@ -71,6 +74,18 @@ export const router = createBrowserRouter([
       {
         path: '/news',
         element: <News />,
+      },
+      {
+        path: '/agritech-chatbot',
+        element: <AgritechChatbotPage />,
+      },
+      {
+        path: '/farm-data',
+        element: <FarmDataEntry />,
+      },
+      {
+        path: '/farm-debug',
+        element: <FarmDataDebugPage />,
       },
     ],
   },

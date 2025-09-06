@@ -101,12 +101,18 @@ def analyze_image():
         
         # Cleanup
         os.remove(temp_path)
-
-        return jsonify({
-            "prediction": classes[preds[0].item()],
-            "confidence": float(confidence[0].item()),
+        if confidence[0].item() <75 :
+            return jsonify({
+            "prediction": "Non - Plant Image",
+            "confidence": 0,
             "success": True
-        })
+            })
+        else :
+            return jsonify({
+                "prediction": classes[preds[0].item()],
+                "confidence": float(confidence[0].item()),
+                "success": True
+            })
 
     except Exception as e:
         return jsonify({"error": str(e), "success": False}), 500
