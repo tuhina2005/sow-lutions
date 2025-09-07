@@ -118,7 +118,7 @@ class AgritechChatbotRobustService {
 
       console.log(`🔍 Getting user context for user ID: ${userId}`);
 
-      const { data: user, error: userError } = await supabase
+      let { data: user, error: userError } = await supabase
         .from('users')
         .select('*')
         .eq('user_id', userId)

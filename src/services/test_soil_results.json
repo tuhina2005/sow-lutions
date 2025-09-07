@@ -1,0 +1,23 @@
+{
+  "location": {
+    "coordinates": {
+      "lon": 75.983,
+      "lat": 31.583
+    },
+    "mode": "buffer",
+    "buffer_m": 2000
+  },
+  "static": {
+    "sand_0to5cm_mean": 45.2,
+    "silt_0to5cm_mean": 32.1,
+    "clay_0to5cm_mean": 22.7,
+    "phh2o_0to5cm_mean": 6.8
+  },
+  "dynamic": {
+    "ERA5_moisture_value": 0.25,
+    "ERA5_temp_value": 28.5,
+    "SMAP_sm_surface": 0.23
+  },
+  "status": "success",
+  "message": "Mock analysis completed successfully"
+}

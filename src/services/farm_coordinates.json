@@ -1,0 +1,21 @@
+{
+  "VILLAGE_COORD": [
+    75.983,
+    31.583
+  ],
+  "location_info": {
+    "state": "Punjab",
+    "district": "Ludhiana",
+    "tehsil": "Ludhiana East",
+    "coordinates": {
+      "latitude": 31.583,
+      "longitude": 75.983
+    }
+  },
+  "npk_values": {
+    "nitrogen": 120,
+    "phosphorus": 80,
+    "potassium": 150
+  },
+  "timestamp": "2025-09-07T00:45:51.257Z"
+}
