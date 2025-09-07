@@ -42,7 +42,7 @@ COMMODITY_ID_TO_NAME = {2: 'Paddy(Dhan)(Common)',4: 'Maize',5: 'Jowar(Sorghum)',
 COMMODITY_NAME_TO_ID = {v: k for k, v in COMMODITY_ID_TO_NAME.items()}
 
 class CommodityPricePredictor:
-    def __init__(self, models_dir='saved_models', sequence_length=30):
+    def __init__(self, models_dir='/Users/tuhinaagarwal/Desktop/agritech/src/services/saved_models', sequence_length=30):
         self.models_dir = models_dir
         self.models_path = os.path.join(models_dir, 'models')
         self.scalers_path = os.path.join(models_dir, 'scalers')
@@ -144,7 +144,7 @@ def predict():
         commodity_id = COMMODITY_NAME_TO_ID[crop_name]
 
         # Load historical data
-        historical_file = 'historical_data.csv'  # Update this path as needed
+        historical_file = '/Users/tuhinaagarwal/Desktop/agritech/src/services/historical_data.csv'  # Update this path as needed
         if not os.path.exists(historical_file):
             print(f"Historical data file not found: {historical_file}")
             return jsonify({'error': 'Historical data not found'}), 500
@@ -153,7 +153,7 @@ def predict():
         print(f"Historical data loaded. Number of records: {len(historical_data)}")
 
         # Predict
-        predictor = CommodityPricePredictor(models_dir='saved_models')
+        predictor = CommodityPricePredictor(models_dir='/Users/tuhinaagarwal/Desktop/agritech/src/services/saved_models')
         print(f"Predicting for district {district_id}, commodity {commodity_id}")
         predictions = predictor.predict_future_prices(
             district_id=district_id,

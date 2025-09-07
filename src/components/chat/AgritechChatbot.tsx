@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Send, User, Bot, Globe, Settings, History, Plus, MapPin } from 'lucide-react';
-import { agritechChatbotRobustService } from '../../services/ai/agritech-chatbot-robust.service';
+import { Send, User, Bot, Globe, Settings, History, Plus, MapPin, Volume2, VolumeX } from 'lucide-react';
+import { soilDataChatbotService } from '../../services/ai/soil-data-chatbot.service';
 import { multilingualService } from '../../services/ai/multilingual.service';
+import VoiceChatButton from './VoiceChatButton';
 
 interface Message {
   id: string;
@@ -30,6 +31,7 @@ export default function AgritechChatbot() {
   const [showProfileSetup, setShowProfileSetup] = useState(false);
   const [showLanguageSelector, setShowLanguageSelector] = useState(false);
   const [selectedLanguage, setSelectedLanguage] = useState('en');
+  const [voiceEnabled, setVoiceEnabled] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const supportedLanguages = multilingualService.getSupportedLanguages();
@@ -75,13 +77,9 @@ export default function AgritechChatbot() {
     setIsLoading(true);
 
     try {
-      // Use user profile ID if available, otherwise let the service find any available user
-      const userId = userProfile?.user_id;
-      
-      const response = await agritechChatbotRobustService.generateResponse(
+      const response = await soilDataChatbotService.generateResponse(
         input,
         selectedLanguage,
-        userId,
         sessionId
       );
 
@@ -99,6 +97,16 @@ export default function AgritechChatbot() {
       };
 
       setMessages(prev => [...prev, botMessage]);
+      
+      // Auto-speak the response if voice is enabled
+      if (voiceEnabled && response.text) {
+        try {
+          const { voiceChatService } = await import('../../services/ai/voice-chat.service');
+          await voiceChatService.speak(response.text, selectedLanguage);
+        } catch (voiceError) {
+          console.log('Voice output failed:', voiceError);
+        }
+      }
     } catch (error) {
       console.error('Error sending message:', error);
       const errorMessage: Message = {
@@ -121,6 +129,30 @@ export default function AgritechChatbot() {
     }
   };
 
+  const handleVoiceInput = (text: string) => {
+    setInput(text);
+    // Auto-send the voice input
+    setTimeout(() => {
+      handleSendMessage();
+    }, 500);
+  };
+
+  const handleVoiceOutput = async (text: string) => {
+    // This will be called when user wants to hear the last bot response
+    const lastBotMessage = messages.filter(m => m.isBot).pop();
+    if (lastBotMessage) {
+      try {
+        const { voiceChatService } = await import('../../services/ai/voice-chat.service');
+        await voiceChatService.speak(lastBotMessage.text, selectedLanguage, {
+          speechRate: 0.9,
+          speechPitch: 1.0
+        });
+      } catch (voiceError) {
+        console.error('Voice output failed:', voiceError);
+      }
+    }
+  };
+
   const handleLanguageChange = async (newLanguage: string) => {
     setSelectedLanguage(newLanguage);
     setShowLanguageSelector(false);
@@ -138,45 +170,16 @@ export default function AgritechChatbot() {
   };
 
   const setupUserProfile = async () => {
-    const profileData = {
+    // Soil data chatbot doesn't require user profiles
+    // This is kept for UI compatibility but doesn't create actual profiles
+    setUserProfile({
+      user_id: 1,
       name: 'Demo User',
       location: 'Punjab, India',
       preferred_language: selectedLanguage,
       farm_size: 5.0,
-      farming_experience_years: 10
-    };
-
-    const userId = await agritechChatbotRobustService.createUserProfile(profileData);
-    if (userId) {
-      // Add sample farm data
-      await agritechChatbotRobustService.addFarmToUser(userId, {
-        farm_name: 'Main Farm',
-        soil_type: 'Loamy',
-        ph: 6.5,
-        organic_carbon: 1.2,
-        irrigation_available: true,
-        irrigation_type: 'Drip',
-        farm_area: 5.0,
-        latitude: 31.583,
-        longitude: 75.983
-      });
-
-      setUserProfile({
-        user_id: userId,
-        ...profileData,
-        farms: [{
-          farm_id: 1,
-          farm_name: 'Main Farm',
-          soil_type: 'Loamy',
-          ph: 6.5,
-          organic_carbon: 1.2,
-          irrigation_available: true,
-          farm_area: 5.0,
-          latitude: 31.583,
-          longitude: 75.983
-        }]
-      });
-    }
+      farms: []
+    });
     setShowProfileSetup(false);
   };
 
@@ -205,7 +208,7 @@ export default function AgritechChatbot() {
         {/* Header */}
         <div className="p-4 border-b border-gray-200">
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-gray-800">AgriTech Assistant</h2>
+            <h2 className="text-lg font-semibold text-gray-800">Soil Data Assistant</h2>
             <div className="flex space-x-2">
               <button
                 onClick={() => setShowLanguageSelector(!showLanguageSelector)}
@@ -213,6 +216,17 @@ export default function AgritechChatbot() {
                 title="Change Language"
               >
                 <Globe className="w-5 h-5" />
+              </button>
+              <button
+                onClick={() => setVoiceEnabled(!voiceEnabled)}
+                className={`p-2 rounded-lg transition-colors ${
+                  voiceEnabled 
+                    ? 'text-green-600 hover:text-green-700 hover:bg-green-50' 
+                    : 'text-gray-600 hover:text-gray-800 hover:bg-gray-100'
+                }`}
+                title={voiceEnabled ? "Disable Voice" : "Enable Voice"}
+              >
+                {voiceEnabled ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}
               </button>
               <button
                 onClick={() => setShowProfileSetup(true)}
@@ -265,6 +279,9 @@ export default function AgritechChatbot() {
               </div>
               <div className="text-sm text-gray-600">
                 Language: {supportedLanguages[userProfile.preferred_language]}
+              </div>
+              <div className="text-sm text-gray-600">
+                Voice: {voiceEnabled ? 'Enabled' : 'Disabled'}
               </div>
             </div>
           ) : (
@@ -368,9 +385,9 @@ export default function AgritechChatbot() {
         <div className="p-4 border-b border-gray-200 bg-white">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-xl font-semibold text-gray-800">Agricultural Assistant</h1>
+              <h1 className="text-xl font-semibold text-gray-800">Soil Data Assistant</h1>
               <p className="text-sm text-gray-600">
-                Ask me anything about farming, crops, soil, or agriculture
+                Ask me anything about soil data, soil health, and agricultural recommendations
               </p>
             </div>
             <div className="flex items-center space-x-2 text-sm text-gray-600">
@@ -448,12 +465,21 @@ export default function AgritechChatbot() {
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyPress={handleKeyPress}
-                placeholder={`Ask about farming in ${supportedLanguages[selectedLanguage]}...`}
+                placeholder={`Ask about soil data in ${supportedLanguages[selectedLanguage]}...`}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 resize-none"
                 rows={1}
                 disabled={isLoading}
               />
             </div>
+            
+            {/* Voice Chat Button */}
+            <VoiceChatButton
+              onVoiceInput={handleVoiceInput}
+              onVoiceOutput={handleVoiceOutput}
+              language={selectedLanguage}
+              disabled={isLoading}
+            />
+            
             <button
               onClick={handleSendMessage}
               disabled={!input.trim() || isLoading}
